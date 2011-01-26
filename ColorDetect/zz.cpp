@@ -1,7 +1,44 @@
 #include "stdafx.h"
+#include <iostream>
 
 namespace zz
 {
+	namespace zSerial
+	{
+		DCB dcb;
+		HANDLE hPort;
+		void SerialInit()
+		{
+		    hPort=CreateFile(
+				_T("COM1"),
+				GENERIC_WRITE,
+				0,
+				NULL,
+				OPEN_EXISTING,
+				0,
+				NULL);
+
+			dcb.BaudRate=CBR_115200;
+			dcb.ByteSize=8;
+			dcb.Parity=0;
+			dcb.StopBits=0;
+
+			if(!GetCommState(hPort,&dcb))
+			{
+				std::cout<< "err comm";
+			}
+		}
+		void SerialClose()
+		{
+			CloseHandle(hPort);
+		}
+		void SerialWrite(const char *str)
+		{
+			DWORD byteswritten;
+			WriteFile(hPort,str,std::strlen(str),&byteswritten,NULL);
+		}
+	}
+
 	void SplitChannel3_1(cv::Mat &s3,cv::Mat &d1,cv::Mat &d2,cv::Mat &d3)
 	{
 		cv::Mat out[]={d1,d2,d3};
@@ -14,7 +51,24 @@ namespace zz
 		cv::bitwise_and(d1,s3,d1,d1);
 	}
 
-	void zColor(cv::Mat &frame,cv::Mat &dst,int hmin,int hmax,int smin,int smax,int vmin,int vmax,int erode,int dilate)
+	void zScanPixel(cv::Mat &frame,cv::Rect box,int *pixel)
+	{
+		*pixel=0;
+		for(int row=box.y;row<box.y+box.height;row++)
+		{
+			uchar *inp=frame.ptr<uchar>(row);
+			inp+=box.x;
+			for(int col=0;col<box.width;col++)
+			{
+				if(*inp!=0)
+				{
+					(*pixel)++;
+				}
+				inp++;
+			}
+		}	
+	}
+	void zDetectColor(cv::Mat &frame,cv::Mat &dst,int hmin,int hmax,int smin,int smax,int vmin,int vmax,int erode,int dilate)
 	{
 		cv::Mat hsv;
 		cv::Mat hue,sat,val;
