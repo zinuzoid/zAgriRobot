@@ -9,7 +9,12 @@
 
 #include <stdio.h>
 #include <tchar.h>
-#ifndef _opencv_hpp#define _opencv_hpp#include <opencv2/video/tracking.hpp>
+
+
+#ifndef _opencv_hpp
+#define _opencv_hpp
+
+#include <opencv2/video/tracking.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 

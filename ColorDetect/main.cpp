@@ -6,25 +6,26 @@
 
 cv::Point select_origin;
 cv::Rect select_rect;
-bool select_on=false;
-int
-	soilhmin=175,
-	soilhmax=185,
-	soilsmin=65,
-	soilsmax=108,
-	soilvmin=136,
-	soilvmax=253,
-	soilerode=1,
-	soildilate=10,
+//bool select_on=false;
 
-	spothmin=175,
-	spothmax=185,
-	spotsmin=65,
-	spotsmax=108,
-	spotvmin=136,
-	spotvmax=253,
+int
+	soilhmin=54,
+	soilhmax=82,
+	soilsmin=126,
+	soilsmax=255,
+	soilvmin=39,
+	soilvmax=159,
+	soilerode=1,
+	soildilate=2,
+
+	spothmin=8,
+	spothmax=23,
+	spotsmin=203,
+	spotsmax=255,
+	spotvmin=85,
+	spotvmax=208,
 	spoterode=1,
-	spotdilate=10;
+	spotdilate=5;
 
 void WindowInit()
 {
@@ -70,12 +71,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	std::cout << "Initial Webcam...";
 	cap.open(0);
-	if(!cap.isOpened())
-	{
-		std::printf("err init webcam!");
-		std::getchar();
-		return 0;
-	}
 	std::cout << "OK!\n";
 
 	std::cout << "Initial Serial...";
@@ -95,18 +90,12 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		cap >> frame;
 
-		if(frame.empty())
-		{
-			std::cout<<"err!!!";
-			cv::waitKey(0);
-			break;
-		}
-
 		zz::zDetectColor(frame,soil,soilhmin,soilhmax,soilsmin,soilsmax,soilvmin,soilvmax,soilerode,soildilate);
 		zz::zDetectColor(frame,spot,spothmin,spothmax,spotsmin,spotsmax,spotvmin,spotvmax,spoterode,spotdilate);
 
+		//
 		int soilleft,soilright,spotup,spotdown;
-		const double spotpos=0.8;
+		const double spotpos=0.6;
 		cv::Rect soilleftrect=cv::Rect(0,0,soil.cols/2,soil.rows);
 		cv::Rect soilrightrect=cv::Rect(soil.cols/2,0,soil.cols/2,soil.rows);
 		cv::Rect spotuprect=cv::Rect(0,0,spot.cols,(int)(spot.rows*spotpos));
@@ -115,7 +104,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		zz::zScanPixel(soil,soilrightrect,&soilright);	
 		zz::zScanPixel(spot,spotuprect,&spotup);	
 		zz::zScanPixel(spot,spotdownrect,&spotdown);	
-		
+		//
+
 		//draw line
 		cv::rectangle(soil,soilleftrect,cv::Scalar(128));
 		cv::rectangle(soil,soilrightrect,cv::Scalar(128));
@@ -130,23 +120,88 @@ int _tmain(int argc, _TCHAR* argv[])
 		cv::imshow("Raw",frame);
 		cv::imshow("Soil",soil);
 		cv::imshow("Spot",spot);
+		/*
+		if(spotdown>500)
+		{
+			std::ostringstream sbuff;
+			unsigned char op_send=0;
+			op_send=0x6f;//0b01101111
+
+			sbuff<< op_send;
+			zz::zSerial::SerialWrite(sbuff.str().data());
 		
+
+			std::cout<< op_send << '#';
+			//std::cout<< "l: " << soilleft << "\tr: " << soilright;
+			//std::cout<< "per: " << soilpercent;
+			std::cout<< "\tu: " << spotup << "\td: " << spotdown;
+		}
+		*/
+
+		unsigned char op_send=0;
+		int op_l=0,op_r=0;
+		
+		int soilsum=soilleft+soilright;
+		int soilpercent=50;
+
+		if(spotdown>2000)
+		{
+			op_send=0x3F;//0b00111111
+		}
+		else 
+		{
+			if(soilsum>20000)
+			{
+				soilpercent=soilleft*100/(soilsum);
+				if(soilpercent<30)
+				{
+					op_l=0;
+					op_r=7;
+				}
+				else if(soilpercent>70)
+				{
+					op_l=7;
+					op_r=0;
+				}
+				else
+				{
+					op_l=7;
+					op_r=7;
+				}
+			}
+			else
+			{
+				op_l=7;
+				op_r=7;
+			}
+			op_send|=0x80;//0b10000000
+			op_send|=op_l<<3;
+			op_send|=op_r;
+		}
+
 		std::ostringstream sbuff;
-		sbuff<< soilleft << '\t' << soilright << "\r\n";
+		sbuff<< op_send;
 		zz::zSerial::SerialWrite(sbuff.str().data());
+		if(op_send==0x3F)
+			exit(0); //exit ley
+
+		std::cout<< op_send << '#';
+		std::cout<< "l: " << soilleft << "\tr: " << soilright;
+		std::cout<< "per: " << soilpercent;
+		std::cout<< "\tu: " << spotup << "\td: " << spotdown;
+		
+		//cv::waitKey(500);
 
 		tt=(double)cv::getTickCount()-tt;
 		tt=tt/cv::getTickFrequency()*1000;
 
-		std::cout<< "l: " << soilleft << "\tr: " << soilright;
-		std::cout<< "\tu: " << spotup << "\td: " << spotdown;
 		std::cout<< "\tt:" << tt << "ms\n";
 
 		keycode=cv::waitKey(1);
 	}
 
 	zz::zSerial::SerialClose();
-
+	WindowRelease();
 	return 0;
 }
 

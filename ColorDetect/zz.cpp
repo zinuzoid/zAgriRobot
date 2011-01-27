@@ -18,7 +18,7 @@ namespace zz
 				0,
 				NULL);
 
-			dcb.BaudRate=CBR_115200;
+			dcb.BaudRate=CBR_9600;
 			dcb.ByteSize=8;
 			dcb.Parity=0;
 			dcb.StopBits=0;
