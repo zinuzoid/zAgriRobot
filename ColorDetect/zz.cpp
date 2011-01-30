@@ -50,6 +50,27 @@ namespace zz
 		cv::bitwise_and(s1,s2,d1,s1);
 		cv::bitwise_and(d1,s3,d1,d1);
 	}
+	void zinRange(cv::Mat &src,uchar a,uchar b,cv::Mat &dst)
+	{
+		cv::Mat dsttmp=cv::Mat::zeros(src.rows,src.cols,CV_8UC1);
+		for(int row=0;row<src.rows;row++)
+		{
+			uchar *inp=src.ptr<uchar>(row);
+			uchar *out=dsttmp.ptr<uchar>(row);
+			for(int col=0;col<src.cols;col++)
+			{
+				if(
+					((*inp)>=a)&&
+					((*inp)<=b))
+				{
+					*out=255;
+				}
+				inp++;
+				out++;
+			}
+		}
+		dst=dsttmp;
+	}
 
 	void zScanPixel(cv::Mat &frame,cv::Rect box,int *pixel)
 	{
@@ -86,9 +107,12 @@ namespace zz
 		SplitChannel3_1(hsv,hue,sat,val);
 
 		//threshold
-		cv::inRange(hue,hmin,hmax,hue);
-		cv::inRange(sat,smin,smax,sat);
-		cv::inRange(val,vmin,vmax,val);
+		zz::zinRange(hue,hmin,hmax,hue);
+		zz::zinRange(sat,smin,smax,sat);
+		zz::zinRange(val,vmin,vmax,val);
+		//cv::inRange(hue,hmin,hmax,hue);
+		//cv::inRange(sat,smin,smax,sat);
+		//cv::inRange(val,vmin,vmax,val);
 		//end threshold
 
 		//and
