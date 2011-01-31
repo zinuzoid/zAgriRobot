@@ -38,6 +38,30 @@ namespace zz
 			WriteFile(hPort,str,std::strlen(str),&byteswritten,NULL);
 		}
 	}
+	namespace zSetting
+	{
+		void LoadSetting(const char *filename,
+			int *soilhmin,int *soilhmax,int *soilsmin,int *ssoilmax,int *soilvmin,int *soilvmax,int *soilerode,int *soildilate,
+			int *spothmin,int *spothmax,int *spotsmin,int *sspotmax,int *spotvmin,int *spotvmax,int *spoterode,int *spotdilate)
+		{
+			std::FILE *fRead;
+			fopen_s(&fRead,filename,"r");
+			*soilhmin=std::fgetc(fRead);
+			*soilhmax=std::fgetc(fRead);
+			std::fclose(fRead);
+		}
+		void SaveSetting(const char *filename,
+			int soilhmin,int soilhmax,int soilsmin,int ssoilmax,int soilvmin,int soilvmax,int soilerode,int soildilate,
+			int spothmin,int spothmax,int spotsmin,int sspotmax,int spotvmin,int spotvmax,int spoterode,int spotdilate)
+		{
+			std::FILE *fWrite;
+			fopen_s(&fWrite,filename,"w");
+			uchar stmp[]={soilhmin,soilhmax,soilsmin,ssoilmax,soilvmin,soilvmax,soilerode,soildilate,
+				spothmin,spothmax,spotsmin,sspotmax,spotvmin,spotvmax,spoterode,spotdilate};
+			std::fwrite(stmp,1,sizeof(stmp),fWrite);
+			std::fclose(fWrite);
+		}
+	}
 
 	void SplitChannel3_1(cv::Mat &s3,cv::Mat &d1,cv::Mat &d2,cv::Mat &d3)
 	{
