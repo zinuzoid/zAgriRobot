@@ -87,6 +87,9 @@
     </ClCompile>
     <ClCompile Include="zz.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="npk.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

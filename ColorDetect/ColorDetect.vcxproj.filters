@@ -36,4 +36,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="npk.txt" />
+  </ItemGroup>
 </Project>

@@ -95,7 +95,6 @@ namespace zz
 		}
 		dst=dsttmp;
 	}
-
 	void zScanPixel(cv::Mat &frame,cv::Rect box,int *pixel)
 	{
 		*pixel=0;
@@ -150,4 +149,76 @@ namespace zz
 		//end erode&dilate
 
 	}
+	unsigned char *zReadNPK()
+	{
+		unsigned char fbuff[2];
+		std::FILE *Fnpk=std::fopen("npk.txt","r");
+		std::fread(fbuff,1,2,Fnpk);
+		std::fclose(Fnpk);
+		return fbuff;
+	}
+	void zDecision(int soilleft,int soilright,int spotup,int spotdown,int *soilpercentout) {
+		unsigned char op_send,op_l,op_r;
+		int	soilpercent=50;
+		if((soilleft+soilright)>20000)soilpercent=soilleft*100/(soilleft+soilright);
+
+		if(spotdown>4000)
+		{
+			unsigned char op_npk,*snpk;
+			snpk=zReadNPK();
+
+			op_send=0x3F;//0b00111111//tell
+			op_npk=(snpk[0]-'0');
+			op_npk=op_npk|((snpk[1]-'0')<<4);
+
+			std::printf("%3d%3d#%c,%c",op_send,op_npk,snpk[0],snpk[1]);
+
+			std::ostringstream sbuff;
+			sbuff<< op_send;
+			zz::zSerial::SerialWrite(sbuff.str().data());
+			sbuff<< op_npk;
+			zz::zSerial::SerialWrite(sbuff.str().data());
+
+			//exit(0);//////////////////
+		}
+		else 
+		{
+			if(soilleft+soilright>20000)
+			{
+				soilpercent=soilleft*100/(soilleft+soilright);
+				if(soilpercent<30)
+				{
+					op_l=0;
+					op_r=7;
+				}
+				else if(soilpercent>70)
+				{
+					op_l=7;
+					op_r=0;
+				}
+				else
+				{
+					op_l=7;
+					op_r=7;
+				}
+			}
+			else
+			{
+				op_l=7;
+				op_r=7;
+			}
+			op_send=0x80;//0b10000000
+			op_send|=op_l<<3;
+			op_send|=op_r;
+
+			std::printf("%3d#",op_send);
+
+			std::ostringstream sbuff;
+			sbuff<< op_send;
+			zz::zSerial::SerialWrite(sbuff.str().data());
+		}
+
+		*soilpercentout=soilpercent;
+	}
 }
+
