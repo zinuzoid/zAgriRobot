@@ -3,27 +3,27 @@
 #include "zz.hpp"
 
 #include <iostream>
+#include <fstream>//file stream
 
 cv::Point select_origin;
 cv::Rect select_rect;
-//bool select_on=false;
 
 int
-	soilhmin=54,
-	soilhmax=82,
-	soilsmin=126,
-	soilsmax=255,
-	soilvmin=39,
-	soilvmax=159,
-	soilerode=1,
-	soildilate=2,
+	soilhmin=77,
+	soilhmax=95,
+	soilsmin=177,
+	soilsmax=237,
+	soilvmin=149,
+	soilvmax=255,
+	soilerode=0,
+	soildilate=0,
 
-	spothmin=8,
-	spothmax=23,
-	spotsmin=203,
-	spotsmax=255,
-	spotvmin=85,
-	spotvmax=208,
+	spothmin=157,
+	spothmax=255,
+	spotsmin=78,
+	spotsmax=142,
+	spotvmin=103,
+	spotvmax=255,
 	spoterode=1,
 	spotdilate=5;
 
@@ -81,6 +81,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	WindowInit();
 	std::cout << "OK!\n";
 
+	if(!cap.isOpened())exit(0);
+
 	cv::waitKey(1000);
 
 	int keycode=-1;
@@ -95,7 +97,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		//
 		int soilleft,soilright,spotup,spotdown;
-		const double spotpos=0.6;
+		const double spotpos=0.8;
 		cv::Rect soilleftrect=cv::Rect(0,0,soil.cols/2,soil.rows);
 		cv::Rect soilrightrect=cv::Rect(soil.cols/2,0,soil.cols/2,soil.rows);
 		cv::Rect spotuprect=cv::Rect(0,0,spot.cols,(int)(spot.rows*spotpos));
@@ -120,84 +122,19 @@ int _tmain(int argc, _TCHAR* argv[])
 		cv::imshow("Raw",frame);
 		cv::imshow("Soil",soil);
 		cv::imshow("Spot",spot);
-		/*
-		if(spotdown>500)
-		{
-			std::ostringstream sbuff;
-			unsigned char op_send=0;
-			op_send=0x6f;//0b01101111
-
-			sbuff<< op_send;
-			zz::zSerial::SerialWrite(sbuff.str().data());
-		
-
-			std::cout<< op_send << '#';
-			//std::cout<< "l: " << soilleft << "\tr: " << soilright;
-			//std::cout<< "per: " << soilpercent;
-			std::cout<< "\tu: " << spotup << "\td: " << spotdown;
-		}
-		*/
 
 		unsigned char op_send=0;
-		int op_l=0,op_r=0;
-		
-		int soilsum=soilleft+soilright;
-		int soilpercent=50;
+		int soilpercent;
 
-		if(spotdown>2000)
-		{
-			op_send=0x3F;//0b00111111
-		}
-		else 
-		{
-			if(soilsum>20000)
-			{
-				soilpercent=soilleft*100/(soilsum);
-				if(soilpercent<30)
-				{
-					op_l=0;
-					op_r=7;
-				}
-				else if(soilpercent>70)
-				{
-					op_l=7;
-					op_r=0;
-				}
-				else
-				{
-					op_l=7;
-					op_r=7;
-				}
-			}
-			else
-			{
-				op_l=7;
-				op_r=7;
-			}
-			op_send|=0x80;//0b10000000
-			op_send|=op_l<<3;
-			op_send|=op_r;
-		}
-
-		std::ostringstream sbuff;
-		sbuff<< op_send;
-		zz::zSerial::SerialWrite(sbuff.str().data());
-		if(op_send==0x3F)
-			exit(0); //exit ley
-
-		std::cout<< op_send << '#';
-		std::cout<< "l: " << soilleft << "\tr: " << soilright;
-		std::cout<< "per: " << soilpercent;
-		std::cout<< "\tu: " << spotup << "\td: " << spotdown;
-		
-		//cv::waitKey(500);
+		zz::zDecision(soilleft,soilright,spotup,spotdown,&soilpercent);
 
 		tt=(double)cv::getTickCount()-tt;
 		tt=tt/cv::getTickFrequency()*1000;
 
-		std::cout<< "\tt:" << tt << "ms\n";
+		std::printf("l:%5d r:%5d p:%2d u:%5d d:%5d t:%3.2f\n",soilleft,soilright,soilpercent,spotup,spotdown,tt);
 
 		keycode=cv::waitKey(1);
+		
 	}
 
 	zz::zSerial::SerialClose();
