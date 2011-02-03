@@ -41,23 +41,37 @@ namespace zz
 	namespace zSetting
 	{
 		void LoadSetting(const char *filename,
-			int *soilhmin,int *soilhmax,int *soilsmin,int *ssoilmax,int *soilvmin,int *soilvmax,int *soilerode,int *soildilate,
-			int *spothmin,int *spothmax,int *spotsmin,int *sspotmax,int *spotvmin,int *spotvmax,int *spoterode,int *spotdilate)
+			int *soilhmin,int *soilhmax,int *soilsmin,int *soilsmax,int *soilvmin,int *soilvmax,int *soilerode,int *soildilate,
+			int *spothmin,int *spothmax,int *spotsmin,int *spotsmax,int *spotvmin,int *spotvmax,int *spoterode,int *spotdilate)
 		{
 			std::FILE *fRead;
 			fopen_s(&fRead,filename,"r");
 			*soilhmin=std::fgetc(fRead);
 			*soilhmax=std::fgetc(fRead);
+			*soilsmin=std::fgetc(fRead);
+			*soilsmax=std::fgetc(fRead);
+			*soilvmin=std::fgetc(fRead);
+			*soilvmax=std::fgetc(fRead);
+			*soilerode=std::fgetc(fRead);
+			*soildilate=std::fgetc(fRead);
+			*spothmin=std::fgetc(fRead);
+			*spothmax=std::fgetc(fRead);
+			*spotsmin=std::fgetc(fRead);
+			*spotsmax=std::fgetc(fRead);
+			*spotvmin=std::fgetc(fRead);
+			*spotvmax=std::fgetc(fRead);
+			*spoterode=std::fgetc(fRead);
+			*spotdilate=std::fgetc(fRead);
 			std::fclose(fRead);
 		}
 		void SaveSetting(const char *filename,
-			int soilhmin,int soilhmax,int soilsmin,int ssoilmax,int soilvmin,int soilvmax,int soilerode,int soildilate,
-			int spothmin,int spothmax,int spotsmin,int sspotmax,int spotvmin,int spotvmax,int spoterode,int spotdilate)
+			int soilhmin,int soilhmax,int soilsmin,int soilsmax,int soilvmin,int soilvmax,int soilerode,int soildilate,
+			int spothmin,int spothmax,int spotsmin,int spotsmax,int spotvmin,int spotvmax,int spoterode,int spotdilate)
 		{
 			std::FILE *fWrite;
 			fopen_s(&fWrite,filename,"w");
-			uchar stmp[]={soilhmin,soilhmax,soilsmin,ssoilmax,soilvmin,soilvmax,soilerode,soildilate,
-				spothmin,spothmax,spotsmin,sspotmax,spotvmin,spotvmax,spoterode,spotdilate};
+			uchar stmp[]={soilhmin,soilhmax,soilsmin,soilsmax,soilvmin,soilvmax,soilerode,soildilate,
+				spothmin,spothmax,spotsmin,spotsmax,spotvmin,spotvmax,spoterode,spotdilate};
 			std::fwrite(stmp,1,sizeof(stmp),fWrite);
 			std::fclose(fWrite);
 		}
@@ -152,7 +166,8 @@ namespace zz
 	unsigned char *zReadNPK()
 	{
 		unsigned char fbuff[2];
-		std::FILE *Fnpk=std::fopen("npk.txt","r");
+		std::FILE *Fnpk;
+		fopen_s(&Fnpk,"npk.txt","r");
 		std::fread(fbuff,1,2,Fnpk);
 		std::fclose(Fnpk);
 		return fbuff;
@@ -186,12 +201,12 @@ namespace zz
 			if(soilleft+soilright>20000)
 			{
 				soilpercent=soilleft*100/(soilleft+soilright);
-				if(soilpercent<30)
+				if(soilpercent<45)
 				{
 					op_l=0;
 					op_r=7;
 				}
-				else if(soilpercent>70)
+				else if(soilpercent>55)
 				{
 					op_l=7;
 					op_r=0;
@@ -217,7 +232,6 @@ namespace zz
 			sbuff<< op_send;
 			zz::zSerial::SerialWrite(sbuff.str().data());
 		}
-
 		*soilpercentout=soilpercent;
 	}
 }

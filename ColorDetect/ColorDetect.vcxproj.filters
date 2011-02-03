@@ -38,5 +38,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="npk.txt" />
+    <None Include="setting" />
   </ItemGroup>
 </Project>

@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="npk.txt" />
+    <None Include="setting" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -77,6 +77,13 @@ int _tmain(int argc, _TCHAR* argv[])
 	zz::zSerial::SerialInit();
 	std::cout << "OK!\n";
 
+	
+	std::cout << "Load Setting...";
+	zz::zSetting::LoadSetting("setting",
+			&soilhmin,&soilhmax,&soilsmin,&soilvmax,&soilvmin,&soilvmax,&soilerode,&soildilate,
+			&spothmin,&spothmax,&spotsmin,&spotvmax,&spotvmin,&spotvmax,&spoterode,&spotdilate);
+	std::cout << "OK!\n";
+
 	std::cout << "Initial Window...";
 	WindowInit();
 	std::cout << "OK!\n";
@@ -136,6 +143,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		keycode=cv::waitKey(1);
 		
 	}
+	std::cout<< "Save Setting...";
+	zz::zSetting::SaveSetting("setting",
+			soilhmin,soilhmax,soilsmin,soilvmax,soilvmin,soilvmax,soilerode,soildilate,
+			spothmin,spothmax,spotsmin,spotvmax,spotvmin,spotvmax,spoterode,spotdilate);
+	std::cout<< "OK!";
 
 	zz::zSerial::SerialClose();
 	WindowRelease();
