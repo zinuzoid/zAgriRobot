@@ -1,3 +1,13 @@
+/*------------------------------------------------------------------------------------------------
+** Program 	:	targetver.h
+** Project	:	Realtime
+** CPU		:	STM32F100
+** Date		:	3/2/2011
+** Modify	:	Jetsada Machom <Zinuzoid Corporation Co.,Ltd.> zinuzoid@zinuzoid.com
+** Copyright:	
+** Note 	:	
+------------------------------------------------------------------------------------------------*/
+
 #pragma once
 
 // Including SDKDDKVer.h defines the highest available Windows platform.

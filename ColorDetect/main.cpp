@@ -1,12 +1,19 @@
+/*------------------------------------------------------------------------------------------------
+** Program 	:	main.cpp
+** Project	:	Realtime
+** CPU		:	STM32F100
+** Date		:	3/2/2011
+** Modify	:	Jetsada Machom <Zinuzoid Corporation Co.,Ltd.> zinuzoid@zinuzoid.com
+** Copyright:	
+** Note 	:	
+------------------------------------------------------------------------------------------------*/
+
 #include "stdafx.h"
 
 #include "zz.hpp"
 
 #include <iostream>
 #include <fstream>//file stream
-
-cv::Point select_origin;
-cv::Rect select_rect;
 
 int
 	soilhmin=77,
@@ -71,10 +78,11 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	std::cout << "Initial Webcam...";
 	cap.open(0);
+	if(!cap.isOpened())	exit(5);
 	std::cout << "OK!\n";
 
 	std::cout << "Initial Serial...";
-	zz::zSerial::SerialInit();
+	if(!zz::zSerial::SerialInit())	exit(5);
 	std::cout << "OK!\n";
 
 	
@@ -87,8 +95,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	std::cout << "Initial Window...";
 	WindowInit();
 	std::cout << "OK!\n";
-
-	if(!cap.isOpened())exit(0);
 
 	cv::waitKey(1000);
 
@@ -143,7 +149,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		keycode=cv::waitKey(1);
 		
 	}
-	std::cout<< "Save Setting...";
+
+	std::cout<< "Save Setting...";
 	zz::zSetting::SaveSetting("setting",
 			soilhmin,soilhmax,soilsmin,soilvmax,soilvmin,soilvmax,soilerode,soildilate,
 			spothmin,spothmax,spotsmin,spotvmax,spotvmin,spotvmax,spoterode,spotdilate);

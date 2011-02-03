@@ -1,10 +1,25 @@
+/*------------------------------------------------------------------------------------------------
+** Program 	:	zz.hpp
+** Project	:	Realtime
+** CPU		:	STM32F100
+** Date		:	3/2/2011
+** Modify	:	Jetsada Machom <Zinuzoid Corporation Co.,Ltd.> zinuzoid@zinuzoid.com
+** Copyright:	
+** Note 	:	
+------------------------------------------------------------------------------------------------*/
 #include "stdafx.h"
+
+#define ZCOMPORT	"COM1"
+
+#define ZPIXELTHRESHOLD		20000
+#define ZSPOTTHRESHOLD		4000
+#define ZPERCENTTHRESHOLD	5
 
 namespace zz
 {
 	namespace zSerial
 	{
-		void SerialInit();
+		bool SerialInit();
 		void SerialClose();
 		void SerialWrite(const char *str);
 	}

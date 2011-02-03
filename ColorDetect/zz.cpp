@@ -1,16 +1,29 @@
+/*------------------------------------------------------------------------------------------------
+** Program 	:	zz.cpp
+** Project	:	Realtime
+** CPU		:	STM32F100
+** Date		:	3/2/2011
+** Modify	:	Jetsada Machom <Zinuzoid Corporation Co.,Ltd.> zinuzoid@zinuzoid.com
+** Copyright:	
+** Note 	:	
+------------------------------------------------------------------------------------------------*/
+
 #include "stdafx.h"
+
 #include <iostream>
+#include "zz.hpp"
 
 namespace zz
 {
 	namespace zSerial
 	{
+		//use non-overlapped
 		DCB dcb;
 		HANDLE hPort;
-		void SerialInit()
+		bool SerialInit()
 		{
 		    hPort=CreateFile(
-				_T("COM1"),
+				_T(ZCOMPORT),
 				GENERIC_WRITE,
 				0,
 				NULL,
@@ -26,7 +39,9 @@ namespace zz
 			if(!GetCommState(hPort,&dcb))
 			{
 				std::cout<< "err comm";
+				return 0;
 			}
+			return 1;
 		}
 		void SerialClose()
 		{
@@ -144,7 +159,7 @@ namespace zz
 		SplitChannel3_1(hsv,hue,sat,val);
 
 		//threshold
-		zz::zinRange(hue,hmin,hmax,hue);
+		zz::zinRange(hue,hmin,hmax,hue);//fix bug at value=0;
 		zz::zinRange(sat,smin,smax,sat);
 		zz::zinRange(val,vmin,vmax,val);
 		//cv::inRange(hue,hmin,hmax,hue);
@@ -175,9 +190,9 @@ namespace zz
 	void zDecision(int soilleft,int soilright,int spotup,int spotdown,int *soilpercentout) {
 		unsigned char op_send,op_l,op_r;
 		int	soilpercent=50;
-		if((soilleft+soilright)>20000)soilpercent=soilleft*100/(soilleft+soilright);
+		if((soilleft+soilright)>ZPIXELTHRESHOLD)	soilpercent=soilleft*100/(soilleft+soilright);
 
-		if(spotdown>4000)
+		if(spotdown>ZSPOTTHRESHOLD)
 		{
 			unsigned char op_npk,*snpk;
 			snpk=zReadNPK();
@@ -194,19 +209,20 @@ namespace zz
 			sbuff<< op_npk;
 			zz::zSerial::SerialWrite(sbuff.str().data());
 
-			//exit(0);//////////////////
+			//exit(0);//////////////////if want to terminate when first found spot
 		}
 		else 
 		{
-			if(soilleft+soilright>20000)
+			//uncomplete send cmd stage
+			if(soilleft+soilright>ZPIXELTHRESHOLD)
 			{
 				soilpercent=soilleft*100/(soilleft+soilright);
-				if(soilpercent<45)
+				if(soilpercent<50-ZPERCENTTHRESHOLD)
 				{
 					op_l=0;
 					op_r=7;
 				}
-				else if(soilpercent>55)
+				else if(soilpercent>50+ZPERCENTTHRESHOLD)
 				{
 					op_l=7;
 					op_r=0;
@@ -225,6 +241,7 @@ namespace zz
 			op_send=0x80;//0b10000000
 			op_send|=op_l<<3;
 			op_send|=op_r;
+			//end uncomplete send cmd stage
 
 			std::printf("%3d#",op_send);
 
